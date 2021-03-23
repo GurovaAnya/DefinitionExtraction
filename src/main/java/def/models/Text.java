@@ -1,6 +1,9 @@
 package def.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,8 +42,14 @@ public class Text {
     )
     private Redactor owner;
 
-    @ManyToMany(mappedBy = "includedTexts")
-    private List<CorpusInfo> corpusInfos = new ArrayList<>();
+    @ManyToOne()
+    @JoinColumn(
+            name = "corpus_id",
+            referencedColumnName = "id",
+            foreignKey = @ForeignKey(
+                    name = "fk_text_corpus_id")
+    )
+    private CorpusInfo corpusInfo;
 
     @Column(name = "is_processed")
     public boolean isProcessed = false;
@@ -48,12 +57,11 @@ public class Text {
     public Text() {
     }
 
-    public Text(Integer id, String name, List<Descriptor> descriptors, Redactor owner, List<CorpusInfo> corpusInfos) {
-        this.id = id;
+    public Text(String name, List<Descriptor> descriptors, Redactor owner, CorpusInfo corpusInfo) {
         this.name = name;
         this.descriptors = descriptors;
         this.owner = owner;
-        this.corpusInfos = corpusInfos;
+        this.corpusInfo = corpusInfo;
     }
 
     public Integer getId() {
@@ -88,11 +96,19 @@ public class Text {
         this.owner = owner;
     }
 
-    public List<CorpusInfo> getCorpusInfos() {
-        return corpusInfos;
+    public CorpusInfo getCorpusInfo() {
+        return corpusInfo;
     }
 
-    public void setCorpusInfos(List<CorpusInfo> corpusInfos) {
-        this.corpusInfos = corpusInfos;
+    public void setCorpusInfo(CorpusInfo corpusInfos) {
+        this.corpusInfo = corpusInfo;
+    }
+
+    public boolean isProcessed() {
+        return isProcessed;
+    }
+
+    public void setProcessed(boolean processed) {
+        isProcessed = processed;
     }
 }

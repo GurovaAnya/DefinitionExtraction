@@ -1,6 +1,9 @@
 package def.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.List;
 
 @Entity(name = "Definition")
@@ -54,6 +57,7 @@ public class Definition {
     @Column(name = "end_offset")
     private Long endOffset;
 
+    @JsonIgnore
     @OneToMany(
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
             mappedBy = "definition")

@@ -1,6 +1,9 @@
 package def.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +43,7 @@ public class Redactor {
             mappedBy = "owner")
     private List<Text> texts = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(
             cascade = {CascadeType.PERSIST, CascadeType.DETACH},
             mappedBy = "owner")

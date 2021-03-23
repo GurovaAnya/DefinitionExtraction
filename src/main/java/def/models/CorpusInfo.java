@@ -1,12 +1,15 @@
 package def.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "Corpus")
 @Table(name = "corpus")
-public class CorpusInfo {
+public class CorpusInfo  {
     @Id
     @SequenceGenerator(
             name = "SQ_corpus_id",
@@ -21,11 +24,10 @@ public class CorpusInfo {
             updatable = false)
     private Integer id;
 
-    @ManyToMany
-    @JoinTable(
-            name = "text",
-            joinColumns = @JoinColumn(name = "corpus_id"),
-            inverseJoinColumns = @JoinColumn(name = "text_id"))
+    @JsonIgnore
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            mappedBy = "corpusInfo")
     List<Text> includedTexts = new ArrayList<>();
 
     public CorpusInfo() {

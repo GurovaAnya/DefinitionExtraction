@@ -1,6 +1,9 @@
 package def.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +38,7 @@ public class Descriptor {
     )
     private Text text;
 
+    @JsonIgnore
     @OneToMany(
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
             mappedBy = "descriptor")
@@ -45,6 +49,12 @@ public class Descriptor {
 
     @Column(name = "end_offset")
     private Long endOffset;
+
+    @JsonIgnore
+    @OneToMany(
+            cascade = {CascadeType.ALL},
+            mappedBy = "descriptor")
+    private List<Definition> definitions = new ArrayList<>();
 
     public Descriptor() {
     }
@@ -94,6 +104,22 @@ public class Descriptor {
 
     public void setEndOffset(Long endOffset) {
         this.endOffset = endOffset;
+    }
+
+    public List<DefinitionDescriptorConnection> getUsedInDefinitions() {
+        return usedInDefinitions;
+    }
+
+    public void setUsedInDefinitions(List<DefinitionDescriptorConnection> usedInDefinitions) {
+        this.usedInDefinitions = usedInDefinitions;
+    }
+
+    public List<Definition> getDefinitions() {
+        return definitions;
+    }
+
+    public void setDefinitions(List<Definition> definitions) {
+        this.definitions = definitions;
     }
 
     @Override

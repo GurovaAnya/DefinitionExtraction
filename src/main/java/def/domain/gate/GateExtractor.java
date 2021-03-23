@@ -1,19 +1,19 @@
 package def.domain.gate;
 
-import def.models.*;
+import def.models.Definition;
+import def.models.Descriptor;
+import def.models.PatternInfo;
+import def.models.Text;
 import gate.*;
 import gate.creole.Plugin;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import javax.print.Doc;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 public class GateExtractor {
@@ -21,7 +21,7 @@ public class GateExtractor {
     SerialAnalyserController controller;
     Corpus corpus;
     LanguageAnalyser patternAnalyser;
-    CorpusInfo corpusInfo;
+    List<Text> textsToProcess;
 
     String controllerPath = "gate.creole.SerialAnalyserController";
     String engTokenizerPath = "gate.creole.tokeniser.DefaultTokeniser";
@@ -33,41 +33,47 @@ public class GateExtractor {
 
     };
 
-    public List<Definition> extract(CorpusInfo corpusInfo, List<PatternInfo> patternInfos) throws Exception{
-        this.corpusInfo = corpusInfo;
+    public List<Definition> extract(List<Text> textsToProcess, List<PatternInfo> patternInfos) throws Exception{
+        this.textsToProcess = textsToProcess;
         this.patternInfos = patternInfos;
 
         prepareGate();
         controller.execute();
-        List<Definition> definitions = getDefinitions();
-        return definitions;
+        return getDefinitions();
     }
 
     private List<Definition> getDefinitions() {
         List<Definition> definitions = new ArrayList<>();
-        for(Document doc: corpus){
-            AnnotationSet myMarkupSet = doc.getAnnotations();
+        for(int i=0; i<corpus.size();i++)
+        {
+            AnnotationSet myMarkupSet = corpus.get(i).getAnnotations();
             AnnotationSet definitionsAS = myMarkupSet.get("Definition");
-            AnnotationSet descriptorsAS = myMarkupSet.get("Descriptor");
 
-            for (Annotation annotation: descriptorsAS
+            for (Annotation annotation: definitionsAS
                  ) {
-                Definition definition = getInfo(annotation);
+                Definition definition = getInfo(annotation, i);
                 definitions.add(definition);
             }
         }
         return definitions;
     }
 
-    private Definition getInfo(Annotation annotationDesc){
-        String descriptorText = (String)annotationDesc.getFeatures().get("descriptorString");
-        Descriptor descriptor = new Descriptor(descriptorText, null,
-                annotationDesc.getStartNode().getOffset(), annotationDesc.getStartNode().getOffset());
+    private Definition getInfo(Annotation annotationDesc, int textNum){
+        Text text = new Text();
+        text.setId(textNum);
 
+        String descriptorText = (String) annotationDesc.getFeatures().get("descriptorContent");
+        Long descStart = (Long) annotationDesc.getFeatures().get("descStart");
+        Long descEnd = (Long) annotationDesc.getFeatures().get("descEnd");
 
-        String definitionText = (String)annotationDesc.getFeatures().get("definitionString");
-        Definition definition = new Definition(definitionText, descriptor, null,
-                annotationDesc.getStartNode().getOffset(), annotationDesc.getStartNode().getOffset());
+        String definitionText = (String)annotationDesc.getFeatures().get("definitionContent");
+        Long defStart = (Long) annotationDesc.getFeatures().get("defStart");
+        Long defEnd = (Long) annotationDesc.getFeatures().get("defEnd");
+
+        Descriptor descriptor = new Descriptor(descriptorText, text,
+                descStart, descEnd);
+        Definition definition = new Definition(definitionText, descriptor, text,
+                defStart, defEnd);
 
         return definition;
 
@@ -83,25 +89,24 @@ public class GateExtractor {
 
     private void loadCorpus() throws ResourceInstantiationException, MalformedURLException {
         corpus = Factory.newCorpus("myCorpus");
-        //for (Text text: corpusInfo.getIncludedTexts()
-          //   ) {
-            //TODO: исправить
-            //Document document = Factory.newDocument(text.getName());
-            Document document = Factory.newDocument(new File("/Users/anna/Desktop/text").toURI().toURL());
+        for (Text text: textsToProcess
+             ) {
+            Document document = Factory.newDocument(new File(text.getName()).toURI().toURL());
             corpus.add(document);
-       // }
+        }
     }
 
     private void loadPatterns() throws MalformedURLException, ResourceInstantiationException {
         FeatureMap patternFeature = Factory.newFeatureMap();
-        //Todo: ispravit
-        patternFeature.put("grammarURL", new File("/Users/anna/Desktop/101.jape").toURI().toURL());
-        patternAnalyser = (LanguageAnalyser) Factory.createResource("gate.creole.Transducer", patternFeature);
 
-        /*for (PatternInfo patternInfo: patternInfos
+        for (PatternInfo patternInfo: patternInfos
              ) {
-            pattternFeature.put("grammarURL", new File(patternInfo.getName()).toURI().toURL());
-        }*/
+            patternFeature.put("grammarURL", new File(patternInfo.getPathToFile()).toURI().toURL());
+        }
+        try {
+            patternAnalyser = (LanguageAnalyser) Factory.createResource("gate.creole.Transducer", patternFeature);
+        }
+        catch(Exception ex){}
     }
 
     private void prepareAnniePlugin() throws Exception{
