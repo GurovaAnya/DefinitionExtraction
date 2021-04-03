@@ -51,7 +51,7 @@ public class GateExtractor {
 
             for (Annotation annotation: definitionsAS
                  ) {
-                Definition definition = getInfo(annotation, i);
+                Definition definition = getInfo(annotation, textsToProcess.get(i).getId());
                 definitions.add(definition);
             }
         }

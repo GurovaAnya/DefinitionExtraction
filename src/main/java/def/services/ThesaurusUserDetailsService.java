@@ -23,7 +23,7 @@ public class ThesaurusUserDetailsService implements UserDetailsService {
         if (redactorResponse.isEmpty())
             throw new UsernameNotFoundException("Пользователь не найден");
         Redactor redactor = redactorResponse.get(0);
-        return new User(redactor.getName(), redactor.getPassword(), new ArrayList<>());
+        return new User(redactor.getLogin(), redactor.getPassword(), new ArrayList<>());
     }
 }
 

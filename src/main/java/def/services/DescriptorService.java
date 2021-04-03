@@ -18,6 +18,7 @@ public class DescriptorService extends AbstractService<Descriptor, DescriptorDto
     @Autowired
     public DescriptorService(DescriptorRepository descriptorRepository, DescriptorMapper descriptorMapper) {
         super(Descriptor.class, DescriptorDto.class);
+        super.repository = descriptorRepository;
         this.repository = descriptorRepository;
         this.mapper = descriptorMapper;
     }

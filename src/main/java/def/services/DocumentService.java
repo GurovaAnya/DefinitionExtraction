@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+
 @Service
 public class DocumentService {
     @Autowired
@@ -17,7 +19,7 @@ public class DocumentService {
     @Autowired
     CorpusDomain corpusDomain;
 
-    public String loadDocument(Integer corpusId, MultipartFile file) throws NotFoundException {
+    public String loadDocument(Integer corpusId, File file) throws NotFoundException {
         CorpusInfo corpusInfo = corpusDomain.getCorpusById(corpusId);
         String path =  documentLoader.uploadFile(file);
         Text text = new Text(path, null, null, corpusInfo);
